@@ -1,5 +1,5 @@
 # Quick Continue - Windows one-line installer
-# Usage: irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/hope0719/quick-continue/main/install.ps1 | iex
 #   With floating button:  $button=$true; irm ... | iex
 
 $ErrorActionPreference = "Stop"
@@ -10,7 +10,7 @@ if (Get-Variable button -Scope Global -ErrorAction SilentlyContinue) {
     $useButton = $Global:button
 }
 
-$Repo   = "hope0719/workbuddy-quick-continue"
+$Repo   = "hope0719/quick-continue"
 $Branch = "main"
 $Base   = "https://raw.githubusercontent.com/$Repo/$Branch"
 

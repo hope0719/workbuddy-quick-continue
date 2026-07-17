@@ -1,5 +1,5 @@
 # Quick Continue - Windows uninstaller
-# Usage: irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/uninstall.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/hope0719/quick-continue/main/uninstall.ps1 | iex
 
 $InstallDir   = Join-Path $env:LOCALAPPDATA "QuickContinue"
 $StartupDir   = [Environment]::GetFolderPath("Startup")

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Quick Continue - macOS uninstaller
-# Usage: curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/uninstall.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/hope0719/quick-continue/main/uninstall.sh | bash
 
 set -e
 

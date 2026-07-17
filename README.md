@@ -18,7 +18,7 @@
 **macOS（一行命令）：**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hope0719/quick-continue/main/install.sh | bash
 ```
 
 需要 Xcode Command Line Tools（首次运行会提示安装）。安装后自动配置开机启动。
@@ -26,7 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/m
 **需要悬浮按钮？** 加 `--button`：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.sh | bash -s -- --button
+curl -fsSL https://raw.githubusercontent.com/hope0719/quick-continue/main/install.sh | bash -s -- --button
 ```
 
 悬浮按钮模式会创建启动器 .app 并添加到「登录项」，开机自动启动。
@@ -40,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/m
 **Windows（PowerShell 一行命令）：**
 
 ```powershell
-irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/hope0719/quick-continue/main/install.ps1 | iex
 ```
 
 需要 Python 3（[下载](https://python.org)，安装时勾选 Add to PATH）。安装后自动配置开机启动。
@@ -49,10 +49,10 @@ irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/ins
 
 ```bash
 # macOS
-curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hope0719/quick-continue/main/uninstall.sh | bash
 
 # Windows
-irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/uninstall.ps1 | iex
+irm https://raw.githubusercontent.com/hope0719/quick-continue/main/uninstall.ps1 | iex
 ```
 
 ## 点击触发模式
@@ -62,13 +62,13 @@ irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/uni
 **macOS** — 屏幕右下角出现悬浮小按钮，点击即触发（前台运行）：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.sh | bash -s -- --button
+curl -fsSL https://raw.githubusercontent.com/hope0719/quick-continue/main/install.sh | bash -s -- --button
 ```
 
 **Windows** — 屏幕右下角出现悬浮小按钮，可拖动、可右键菜单：
 
 ```powershell
-irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/hope0719/quick-continue/main/install.ps1 | iex
 ```
 
 悬浮按钮支持：
@@ -99,8 +99,8 @@ macOS 版用 Swift 编译，通过 CGEventTap 监听全局键盘事件，osascri
 
 ```bash
 # macOS（仅快捷键）
-git clone https://github.com/hope0719/workbuddy-quick-continue.git
-cd workbuddy-quick-continue
+git clone https://github.com/hope0719/quick-continue.git
+cd quick-continue
 swiftc -O -framework CoreGraphics -framework AppKit -o quick_continue src/mac/quick_continue.swift
 ./quick_continue
 
@@ -110,8 +110,8 @@ swiftc -O -framework CoreGraphics -framework AppKit -o quick_continue src/mac/qu
 
 ```powershell
 # Windows（仅快捷键）
-git clone https://github.com/hope0719/workbuddy-quick-continue.git
-cd workbuddy-quick-continue
+git clone https://github.com/hope0719/quick-continue.git
+cd quick-continue
 python src/windows/quick_continue_win.py
 
 # Windows（快捷键 + 悬浮按钮）

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Quick Continue - macOS one-line installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/hope0719/quick-continue/main/install.sh | bash
 #        curl -fsSL .../install.sh | bash -s -- --button   # With floating button
 
 set -e
@@ -15,7 +15,7 @@ for arg in "$@"; do
     esac
 done
 
-REPO="hope0719/workbuddy-quick-continue"
+REPO="hope0719/quick-continue"
 BRANCH="main"
 BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
 

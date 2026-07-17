@@ -17,7 +17,7 @@ let KVK_ANSI_B: UInt32 = 0x0B  // B key
 
 let useButton = CommandLine.arguments.contains("--button")
 let CURRENT_VERSION = "1.1.0"
-let REPO = "hope0719/workbuddy-quick-continue"
+let REPO = "hope0719/quick-continue"
 
 // ─── Simulate input: save clipboard → paste → enter → restore ────
 
