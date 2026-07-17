@@ -7,7 +7,6 @@ set -e
 PLIST_NAME="com.quickcontinue.daemon"
 PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_NAME}.plist"
 APP_DIR="$HOME/Applications/QuickContinue"
-APP_BUNDLE="$APP_DIR/QuickContinue.app"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -31,23 +30,19 @@ else
     warn "LaunchAgent not running."
 fi
 
-# 2) Remove LaunchAgent plist
+# 2) Kill any running quick_continue processes (from --button mode)
+if pgrep -f "quick_continue" >/dev/null 2>&1; then
+    pkill -f "quick_continue" 2>/dev/null || true
+    info "Running processes stopped."
+fi
+
+# 3) Remove LaunchAgent plist
 if [ -f "$PLIST_PATH" ]; then
     rm -f "$PLIST_PATH"
     info "LaunchAgent plist removed."
 fi
 
-# 3) Quit and remove .app bundle (button mode)
-if [ -d "$APP_BUNDLE" ]; then
-    osascript -e 'tell application "QuickContinue" to quit' 2>/dev/null || true
-    sleep 1
-fi
-
-# 4) Remove Login Items entry
-osascript -e 'tell application "System Events" to delete every login item whose name is "QuickContinue"' 2>/dev/null || true
-info "Login Items entry removed."
-
-# 5) Remove app directory
+# 4) Remove app directory
 if [ -d "$APP_DIR" ]; then
     rm -rf "$APP_DIR"
     info "Application removed: $APP_DIR"

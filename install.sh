@@ -23,7 +23,6 @@ APP_DIR="$HOME/Applications/QuickContinue"
 BINARY="$APP_DIR/quick_continue"
 PLIST_NAME="com.quickcontinue.daemon"
 PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_NAME}.plist"
-APP_BUNDLE="$APP_DIR/QuickContinue.app"
 SOURCE_URL="${BASE_URL}/src/mac/quick_continue.swift"
 
 RED='\033[0;31m'
@@ -64,7 +63,7 @@ if ! command -v swiftc &>/dev/null; then
 fi
 info "Swift compiler found: $(swiftc --version | head -1)"
 
-# 3) Stop and remove existing services (both LaunchAgent and Login Items)
+# 3) Stop and remove existing LaunchAgent
 if launchctl list 2>/dev/null | grep -q "$PLIST_NAME"; then
     warn "Stopping existing LaunchAgent..."
     launchctl unload "$PLIST_PATH" 2>/dev/null || true
@@ -72,8 +71,6 @@ fi
 if [ -f "$PLIST_PATH" ]; then
     rm -f "$PLIST_PATH"
 fi
-# Remove old Login Items entry (best-effort via osascript)
-osascript -e 'tell application "System Events" to delete every login item whose name is "QuickContinue"' 2>/dev/null || true
 info "Cleaned up previous installation."
 
 # 4) Create install directory
@@ -107,49 +104,13 @@ chmod +x "$BINARY"
 
 # 7) Configure startup method based on mode
 if [ -n "$EXTRA_ARGS" ]; then
-    # ── Button mode: create .app bundle + Login Item ──
-    # LaunchAgent cannot show GUI (no GUI context in background mode).
-    # Instead, create a .app bundle and add it to Login Items.
-
-    # Build .app bundle structure
-    mkdir -p "$APP_BUNDLE/Contents/MacOS"
-
-    # Create Info.plist
-    cat > "$APP_BUNDLE/Contents/Info.plist" <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key>
-    <string>launch.sh</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.quickcontinue.app</string>
-    <key>CFBundleName</key>
-    <string>QuickContinue</string>
-    <key>CFBundleVersion</key>
-    <string>1.0</string>
-    <key>LSUIElement</key>
-    <true/>
-</dict>
-</plist>
-PLIST
-
-    # Create launcher script inside .app
-    cat > "$APP_BUNDLE/Contents/MacOS/launch.sh" <<LAUNCHER
-#!/bin/bash
-exec "$BINARY" --button
-LAUNCHER
-    chmod +x "$APP_BUNDLE/Contents/MacOS/launch.sh"
-
-    info "Created app bundle: $APP_BUNDLE"
-
-    # Add to Login Items (starts at login with full GUI context)
-    osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"$APP_BUNDLE\", hidden:false}"
-    info "Added to Login Items (auto-start at login)."
-
-    # Start now
-    open "$APP_BUNDLE"
-    info "Service started."
+    # ── Button mode: run in foreground (LaunchAgent has no GUI context) ──
+    info "Starting Quick Continue with floating button..."
+    echo ""
+    echo "  Running in foreground. Press Ctrl+C to stop."
+    echo "  To run in background, use: nohup $BINARY --button > /dev/null 2>&1 &"
+    echo ""
+    exec "$BINARY" --button
 else
     # ── Hotkey-only mode: use LaunchAgent (no GUI needed) ──
     mkdir -p "$HOME/Library/LaunchAgents"
@@ -182,33 +143,21 @@ PLIST
     info "Service started."
 fi
 
-# 8) Done
+# 8) Done (only reached for LaunchAgent mode; --button mode uses exec above)
 echo ""
 echo "=========================================="
 echo -e "  ${GREEN}Installation complete!${NC}"
 echo "=========================================="
 echo ""
 echo "  Hotkey:  Cmd+Shift+J"
-if [ -n "$EXTRA_ARGS" ]; then
-    echo "  Button:  Floating button (bottom-right)"
-fi
 echo "  Action:  Type '继续' + Enter"
 echo ""
-if [ -n "$EXTRA_ARGS" ]; then
-    echo "  Auto-start: Login Items (System Settings → General → Login Items)"
-else
-    echo "  Auto-start: Login (LaunchAgent)"
-fi
+echo "  Auto-start: Login (LaunchAgent)"
 echo ""
 echo "  Commands:"
-if [ -n "$EXTRA_ARGS" ]; then
-    echo "    Stop:    osascript -e 'tell application \"QuickContinue\" to quit'"
-    echo "    Start:   open $APP_BUNDLE"
-else
-    echo "    Stop:    launchctl unload ~/Library/LaunchAgents/${PLIST_NAME}.plist"
-    echo "    Start:   launchctl load ~/Library/LaunchAgents/${PLIST_NAME}.plist"
-    echo "    Logs:    cat ${APP_DIR}/stdout.log"
-fi
+echo "    Stop:    launchctl unload ~/Library/LaunchAgents/${PLIST_NAME}.plist"
+echo "    Start:   launchctl load ~/Library/LaunchAgents/${PLIST_NAME}.plist"
+echo "    Logs:    cat ${APP_DIR}/stdout.log"
 echo "    Uninstall: curl -fsSL ${BASE_URL}/uninstall.sh | bash"
 echo ""
 warn "First time? Grant Accessibility permission:"

@@ -25,7 +25,7 @@ curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/m
 curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.sh | bash -s -- --button
 ```
 
-悬浮按钮模式会创建 .app 并添加到「登录项」，开机自动启动（有 GUI 上下文，悬浮窗可正常显示）。
+悬浮按钮模式会在前台运行（macOS LaunchAgent 无 GUI 上下文，无法显示悬浮窗）。关闭终端即停止。如需后台运行：`nohup ~/Applications/QuickContinue/quick_continue --button > /dev/null 2>&1 &`
 
 **Windows（PowerShell 一行命令）：**
 
@@ -49,7 +49,7 @@ irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/uni
 
 默认只有快捷键。加 `--button` 启用点击触发：
 
-**macOS** — 屏幕右下角出现悬浮小按钮，点击即触发（通过 .app bundle + 登录项启动）：
+**macOS** — 屏幕右下角出现悬浮小按钮，点击即触发（前台运行）：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.sh | bash -s -- --button
