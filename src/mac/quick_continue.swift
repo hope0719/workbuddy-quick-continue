@@ -183,27 +183,42 @@ class ClickableDraggableView: NSView {
     var onClickAction: (() -> Void)?
     var contextMenu: NSMenu?
     private var _didDrag = false
-    private var _dragStart: NSPoint = .zero
+
+    override func layout() {
+        super.layout()
+        needsDisplay = true
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        let text = "▶ 继续" as NSString
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.boldSystemFont(ofSize: 12),
+            .foregroundColor: NSColor.white
+        ]
+        let size = text.size(withAttributes: attrs)
+        let x = (bounds.width - size.width) / 2
+        let y = (bounds.height - size.height) / 2
+        text.draw(at: NSPoint(x: x, y: y), withAttributes: attrs)
+    }
 
     override func mouseDown(with event: NSEvent) {
         _didDrag = false
-        _dragStart = event.locationInWindow
     }
 
     override func mouseDragged(with event: NSEvent) {
-        let current = event.locationInWindow
-        let dx = current.x - _dragStart.x
-        let dy = current.y - _dragStart.y
-        if abs(dx) > 3 || abs(dy) > 3 {
+        // Use deltaX/deltaY (screen-level deltas) instead of locationInWindow.
+        // locationInWindow changes as the window moves, causing feedback loop jitter.
+        let dx = event.deltaX
+        let dy = event.deltaY
+        if abs(dx) > 0.5 || abs(dy) > 0.5 {
             _didDrag = true
             if let panel = window as? NSPanel {
-                // Convert window-relative delta to screen delta
                 var origin = panel.frame.origin
                 origin.x += dx
-                origin.y += dy
+                origin.y -= dy  // deltaX/deltaY: y is inverted vs screen coordinates
                 panel.setFrameOrigin(origin)
             }
-            _dragStart = current
         }
     }
 
@@ -215,7 +230,8 @@ class ClickableDraggableView: NSView {
 
     override func rightMouseDown(with event: NSEvent) {
         if let menu = contextMenu {
-            menu.popUp(positioning: nil, at: NSPoint(x: bounds.midX, y: bounds.midY), in: self)
+            // Pop up below the button to avoid overlapping the text
+            menu.popUp(positioning: nil, at: NSPoint(x: bounds.midX, y: -4), in: self)
         }
     }
 }
@@ -247,20 +263,6 @@ class FloatingButton {
         button.layer?.cornerRadius = 18
         button.autoresizingMask = [.width, .height]
         window.contentView!.addSubview(button)
-
-        // Text label on the button
-        let label = NSTextField(labelWithString: "▶ 继续")
-        label.font = NSFont.boldSystemFont(ofSize: 12)
-        label.textColor = .white
-        label.alignment = .center
-        label.frame = button.bounds
-        label.autoresizingMask = [.width, .height]
-        // Make label transparent to mouse events
-        label.isEditable = false
-        label.isSelectable = false
-        label.isBordered = false
-        label.backgroundColor = .clear
-        button.addSubview(label)
 
         // Click handler
         button.onClickAction = { [weak self] in
