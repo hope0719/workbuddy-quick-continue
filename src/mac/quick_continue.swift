@@ -176,9 +176,44 @@ func performUpdate(version: String) {
 
 // ─── Floating button window ──────────────────────────────────────
 
-// NSButton subclass that handles right-click for context menu
+// NSButton subclass: supports left-click action, drag-to-move, and right-click menu
 class MenuButton: NSButton {
     var contextMenu: NSMenu?
+    private var _didDrag = false
+    private var _trackingMouse = false
+
+    override func mouseDown(with event: NSEvent) {
+        _didDrag = false
+        _trackingMouse = true
+        super.mouseDown(with: event)
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        if _trackingMouse {
+            let dx = event.deltaX
+            let dy = event.deltaY
+            if abs(dx) > 3 || abs(dy) > 3 {
+                _didDrag = true
+                if let panel = window as? NSPanel {
+                    var origin = panel.frame.origin
+                    origin.x += dx
+                    origin.y += dy
+                    panel.setFrameOrigin(origin)
+                }
+            }
+        }
+        super.mouseDragged(with: event)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        _trackingMouse = false
+        super.mouseUp(with: event)
+    }
+
+    override func sendAction(_ action: Selector?, to target: Any?) -> Bool {
+        if _didDrag { return false }
+        return super.sendAction(action, to: target)
+    }
 
     override func rightMouseDown(with event: NSEvent) {
         if let menu = contextMenu {
@@ -190,9 +225,6 @@ class MenuButton: NSButton {
 class FloatingButton {
     var window: NSPanel!
     var button: MenuButton!
-    var isDragging = false
-    var dragStart: NSPoint = .zero
-    var windowStart: NSPoint = .zero
     var contextMenu: NSMenu!
 
     init() {
@@ -235,9 +267,6 @@ class FloatingButton {
         let hideItem = NSMenuItem(title: "隐藏", action: #selector(onHide), keyEquivalent: "")
         hideItem.target = self
         contextMenu.addItem(hideItem)
-        let quitItem = NSMenuItem(title: "退出", action: #selector(onQuit), keyEquivalent: "")
-        quitItem.target = self
-        contextMenu.addItem(quitItem)
         button.contextMenu = contextMenu
 
         // Position: bottom-right of main screen
@@ -261,10 +290,6 @@ class FloatingButton {
 
     @objc func onHide() {
         window.orderOut(nil)
-    }
-
-    @objc func onQuit() {
-        NSApp.terminate(nil)
     }
 
     func show() {
@@ -313,7 +338,8 @@ print("  Hotkey : ⌘+Shift+J")
 if useButton {
     print("  Button : Floating button (bottom-right)")
     print("  Toggle : ⌘+Shift+B (show/hide button)")
-    print("  Menu   : Right-click button → 隐藏/退出")
+    print("  Menu   : Right-click button → 隐藏")
+    print("  Drag   : Drag button to reposition")
 }
 print("  Text   : '\(TEXT)' + Enter")
 print("------------------------------------------------")

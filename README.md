@@ -32,11 +32,12 @@ curl -fsSL https://raw.githubusercontent.com/hope0719/quick-continue/main/instal
 悬浮按钮模式会创建启动器 .app 并添加到「登录项」，开机自动启动。
 
 **使用说明：**
-- **自动运行**：已添加到登录项，开机自动启动
-- **显示按钮**：运行后自动显示在屏幕右下角（固定位置，不可拖拽）
+- **自动运行**：已添加到登录项，重启电脑后自动启动
+- **显示按钮**：运行后自动显示在屏幕右下角（可拖拽移动位置）
 - **隐藏按钮**：右键点击按钮 →「隐藏」，或按 `Cmd+Shift+B` 切换显示/隐藏
 - **重新显示**：按 `Cmd+Shift+B` 即可重新呼出
-- **关闭程序**：右键点击按钮 →「退出」，或 `pkill -f quick_continue`
+- **彻底退出**：`pkill -f quick_continue`（快捷键将同时失效）
+- **重新启动**：`open ~/Applications/QuickContinue/QuickContinueLauncher.app`
 
 **快捷键：**
 
@@ -82,8 +83,8 @@ irm https://raw.githubusercontent.com/hope0719/quick-continue/main/install.ps1 |
 
 悬浮按钮支持：
 - 左键点击：触发输入
-- 右键菜单：隐藏按钮 / 退出程序
-- 固定位置：屏幕右下角，不可拖拽
+- 拖拽移动：按住按钮拖动到任意位置（每次启动重置到右下角）
+- 右键菜单：隐藏按钮（程序继续后台运行，快捷键仍可用）
 
 ## 工作原理
 
