@@ -104,13 +104,30 @@ chmod +x "$BINARY"
 
 # 7) Configure startup method based on mode
 if [ -n "$EXTRA_ARGS" ]; then
-    # ── Button mode: run in foreground (LaunchAgent has no GUI context) ──
-    info "Starting Quick Continue with floating button..."
-    echo ""
-    echo "  Running in foreground. Press Ctrl+C to stop."
-    echo "  To run in background, use: nohup $BINARY --button > /dev/null 2>&1 &"
-    echo ""
-    exec "$BINARY" --button
+    # ── Button mode: create launcher .app + Login Item ──
+    # LaunchAgent has no GUI context, so we use a launcher .app instead.
+
+    LAUNCHER_APP="$APP_DIR/QuickContinueLauncher.app"
+
+    # Remove old launcher if exists
+    rm -rf "$LAUNCHER_APP"
+
+    # Create launcher .app using osacompile
+    osacompile -o "$LAUNCHER_APP" <<APPLESCRIPT
+do shell script "$BINARY --button > /dev/null 2>&1 &"
+APPLESCRIPT
+
+    # Codesign the .app (required for macOS to launch it)
+    codesign --force --sign - "$LAUNCHER_APP" 2>/dev/null
+
+    # Add to Login Items for auto-start at login
+    osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"$LAUNCHER_APP\", hidden:false}" 2>/dev/null
+
+    info "Launcher app created and added to Login Items."
+
+    # Start now
+    open "$LAUNCHER_APP"
+    info "Service started. Floating button should appear shortly."
 else
     # ── Hotkey-only mode: use LaunchAgent (no GUI needed) ──
     mkdir -p "$HOME/Library/LaunchAgents"
@@ -143,21 +160,34 @@ PLIST
     info "Service started."
 fi
 
-# 8) Done (only reached for LaunchAgent mode; --button mode uses exec above)
+# 8) Done
 echo ""
 echo "=========================================="
 echo -e "  ${GREEN}Installation complete!${NC}"
 echo "=========================================="
 echo ""
 echo "  Hotkey:  Cmd+Shift+J"
+if [ -n "$EXTRA_ARGS" ]; then
+    echo "  Button:  Floating button (bottom-right)"
+fi
 echo "  Action:  Type '继续' + Enter"
 echo ""
-echo "  Auto-start: Login (LaunchAgent)"
+if [ -n "$EXTRA_ARGS" ]; then
+    echo "  Auto-start: Login Items (System Settings → General → Login Items)"
+else
+    echo "  Auto-start: Login (LaunchAgent)"
+fi
 echo ""
 echo "  Commands:"
-echo "    Stop:    launchctl unload ~/Library/LaunchAgents/${PLIST_NAME}.plist"
-echo "    Start:   launchctl load ~/Library/LaunchAgents/${PLIST_NAME}.plist"
-echo "    Logs:    cat ${APP_DIR}/stdout.log"
+if [ -n "$EXTRA_ARGS" ]; then
+    echo "    Stop:    pkill -f quick_continue"
+    echo "    Start:   open $LAUNCHER_APP"
+    echo "    Toggle:  Click the floating button to hide/show"
+else
+    echo "    Stop:    launchctl unload ~/Library/LaunchAgents/${PLIST_NAME}.plist"
+    echo "    Start:   launchctl load ~/Library/LaunchAgents/${PLIST_NAME}.plist"
+    echo "    Logs:    cat ${APP_DIR}/stdout.log"
+fi
 echo "    Uninstall: curl -fsSL ${BASE_URL}/uninstall.sh | bash"
 echo ""
 warn "First time? Grant Accessibility permission:"
