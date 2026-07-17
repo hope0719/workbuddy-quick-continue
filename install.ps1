@@ -1,7 +1,14 @@
 # Quick Continue - Windows one-line installer
 # Usage: irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.ps1 | iex
+#   With floating button:  $button=$true; irm ... | iex
 
 $ErrorActionPreference = "Stop"
+
+# Check if button mode requested
+$useButton = $false
+if (Get-Variable button -Scope Global -ErrorAction SilentlyContinue) {
+    $useButton = $Global:button
+}
 
 $Repo   = "hope0719/workbuddy-quick-continue"
 $Branch = "main"
@@ -50,9 +57,10 @@ try {
 }
 
 # 4) Create launcher bat
+$buttonArg = if ($useButton) { " --button" } else { "" }
 $LauncherContent = @"
 @echo off
-start /min "" pythonw "$ScriptFile"
+start /min "" pythonw "$ScriptFile"$buttonArg
 "@
 Set-Content -Path $LauncherFile -Value $LauncherContent -Encoding ASCII
 Write-Host "[OK] Launcher created." -ForegroundColor Green
@@ -67,7 +75,7 @@ Write-Host "[OK] Startup shortcut created." -ForegroundColor Green
 
 # 6) Run now
 Write-Host "     Starting service..." -ForegroundColor Gray
-Start-Process -FilePath "python" -ArgumentList "pythonw `"$ScriptFile`"" -WindowStyle Hidden
+Start-Process -FilePath "python" -ArgumentList "pythonw `"$ScriptFile`"$buttonArg" -WindowStyle Hidden
 Write-Host "[OK] Service started." -ForegroundColor Green
 
 Write-Host ""
@@ -76,6 +84,9 @@ Write-Host "  Installation complete!" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Hotkey:  Alt+J"
+if ($useButton) {
+    Write-Host "  Button:  Floating button (bottom-right)" -ForegroundColor Yellow
+}
 Write-Host "  Action:  Type '继续' + Enter"
 Write-Host ""
 Write-Host "  The tool will start automatically on login."
@@ -84,3 +95,8 @@ Write-Host "  Commands:"
 Write-Host "    Stop:      Task Manager > End 'python' task"
 Write-Host "    Uninstall: irm $Base/uninstall.ps1 | iex"
 Write-Host ""
+if (-not $useButton) {
+    Write-Host "  Tip: Add floating click button:" -ForegroundColor Gray
+    Write-Host '    $button=$true; irm ... | iex' -ForegroundColor Gray
+    Write-Host ""
+}

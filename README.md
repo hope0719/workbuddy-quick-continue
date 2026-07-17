@@ -2,10 +2,10 @@
 
 一键自动输入"继续"并回车，搭配 AI 对话工具使用。
 
-| 平台 | 快捷键 | 原理 |
-|------|--------|------|
-| macOS | `Cmd+Shift+J` | Swift 原生，CGEventTap + osascript |
-| Windows | `Alt+J` | Python + Win32 API (ctypes)，零依赖 |
+| 平台 | 快捷键 | 点击触发 | 原理 |
+|------|--------|----------|------|
+| macOS | `Cmd+Shift+J` | 菜单栏 `▶` 图标 | Swift 原生，CGEventTap + osascript |
+| Windows | `Alt+J` | 悬浮小按钮 | Python + Win32 API (ctypes)，零依赖 |
 
 两个平台都会自动保存/恢复剪贴板，不会覆盖你已复制的内容。
 
@@ -37,9 +37,36 @@ curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/m
 irm https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/uninstall.ps1 | iex
 ```
 
+## 点击触发模式
+
+默认只有快捷键。加 `--button` 启用点击触发：
+
+**macOS** — 菜单栏出现 `▶` 图标，点击即触发：
+
+```bash
+# 手动运行
+./quick_continue --button
+
+# 安装为服务（带按钮）
+# 编辑 ~/Library/LaunchAgents/com.quickcontinue.daemon.plist
+# 在 ProgramArguments 中加入 <string>--button</string>
+# 然后 launchctl unload && launchctl load
+```
+
+**Windows** — 屏幕右下角出现悬浮小按钮，可拖动、可右键菜单：
+
+```powershell
+python src/windows/quick_continue_win.py --button
+```
+
+悬浮按钮支持：
+- 左键点击：触发输入
+- 拖拽：移动位置
+- 右键：暂停/继续、退出
+
 ## 工作原理
 
-触发快捷键后：
+触发后（快捷键或点击）：
 
 1. 保存当前剪贴板内容
 2. 将"继续"写入剪贴板
@@ -59,18 +86,24 @@ macOS 版用 Swift 编译，通过 CGEventTap 监听全局键盘事件，osascri
 如果不想安装为服务，也可以直接运行：
 
 ```bash
-# macOS
+# macOS（仅快捷键）
 git clone https://github.com/hope0719/workbuddy-quick-continue.git
 cd workbuddy-quick-continue
 swiftc -O -framework CoreGraphics -framework AppKit -o quick_continue src/mac/quick_continue.swift
 ./quick_continue
+
+# macOS（快捷键 + 菜单栏图标）
+./quick_continue --button
 ```
 
 ```powershell
-# Windows
+# Windows（仅快捷键）
 git clone https://github.com/hope0719/workbuddy-quick-continue.git
 cd workbuddy-quick-continue
 python src/windows/quick_continue_win.py
+
+# Windows（快捷键 + 悬浮按钮）
+python src/windows/quick_continue_win.py --button
 ```
 
 ## License

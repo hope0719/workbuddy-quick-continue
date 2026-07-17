@@ -1,8 +1,21 @@
 #!/bin/bash
 # Quick Continue - macOS one-line installer
 # Usage: curl -fsSL https://raw.githubusercontent.com/hope0719/workbuddy-quick-continue/main/install.sh | bash
+#        curl -fsSL .../install.sh | bash -s -- --button   # With menu bar icon
 
 set -e
+
+# Parse arguments
+EXTRA_ARGS=""
+BUTTON_PLIST_ENTRY=""
+for arg in "$@"; do
+    case $arg in
+        --button)
+            EXTRA_ARGS="--button"
+            BUTTON_PLIST_ENTRY="        <string>--button</string>"
+            ;;
+    esac
+done
 
 REPO="hope0719/workbuddy-quick-continue"
 BRANCH="main"
@@ -89,6 +102,15 @@ chmod +x "$BINARY"
 
 # 7) Create LaunchAgent plist
 mkdir -p "$HOME/Library/LaunchAgents"
+
+# Build ProgramArguments array
+if [ -n "$BUTTON_PLIST_ENTRY" ]; then
+    PROG_ARGS="        <string>${BINARY}</string>
+${BUTTON_PLIST_ENTRY}"
+else
+    PROG_ARGS="        <string>${BINARY}</string>"
+fi
+
 cat > "$PLIST_PATH" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -98,7 +120,7 @@ cat > "$PLIST_PATH" <<PLIST
     <string>${PLIST_NAME}</string>
     <key>ProgramArguments</key>
     <array>
-        <string>${BINARY}</string>
+${PROG_ARGS}
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -124,6 +146,9 @@ echo -e "  ${GREEN}Installation complete!${NC}"
 echo "=========================================="
 echo ""
 echo "  Hotkey:  Cmd+Shift+J"
+if [ -n "$EXTRA_ARGS" ]; then
+    echo "  Button:  Menu bar icon (click ▶)"
+fi
 echo "  Action:  Type '继续' + Enter"
 echo ""
 echo "  The service will start automatically on login."
@@ -134,6 +159,11 @@ echo "    Start:   launchctl load ~/Library/LaunchAgents/${PLIST_NAME}.plist"
 echo "    Logs:    cat ${APP_DIR}/stdout.log"
 echo "    Uninstall: curl -fsSL ${BASE_URL}/uninstall.sh | bash"
 echo ""
+if [ -z "$EXTRA_ARGS" ]; then
+    echo "  Tip: Add menu bar icon button:"
+    echo "    curl -fsSL ${BASE_URL}/install.sh | bash -s -- --button"
+    echo ""
+fi
 warn "First time? Grant Accessibility permission:"
 echo "  System Settings → Privacy & Security → Accessibility → Add Terminal"
 echo ""
