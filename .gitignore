@@ -1,0 +1,15 @@
+# Compiled binary
+quick_continue
+*.exe
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# macOS
+.DS_Store
+*.dSYM/
+
+# Logs
+*.log
