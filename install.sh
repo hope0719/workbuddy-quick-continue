@@ -79,7 +79,7 @@ info "Install directory: $APP_DIR"
 
 # 5) Download source
 echo "  Downloading source..."
-TMP_SOURCE=$(mktemp /tmp/quick_continue_XXXXXX.swift)
+TMP_SOURCE=$(mktemp /tmp/quick_continue_XXXXXXXX.swift)
 if curl -fsSL "$SOURCE_URL" -o "$TMP_SOURCE"; then
     info "Source downloaded."
 else
